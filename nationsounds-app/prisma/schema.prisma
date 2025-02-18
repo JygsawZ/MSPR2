@@ -32,6 +32,7 @@ model Artist {
   imageUrl    String?  // URL de l'image de l'artiste (facultatif)
   scene       String   // Scène de l'artiste
   runningOrders RunningOrder[] // Liste des performances de l'artiste
+  meetings     Meeting[]       // Liste des meetings de l'artiste
   createdAt   DateTime @default(now())              // Date de création
   updatedAt   DateTime @updatedAt                   // Date de dernière mise à jour
 }
@@ -55,4 +56,23 @@ model Product {
   image_url   String?  // URL de l'image du produit (facultatif)
   createdAt   DateTime @default(now())  // Date de création
   updatedAt   DateTime @updatedAt      // Date de mise à jour
+}
+
+model Meeting {
+  id          Int   @id @default(autoincrement())
+  artistId    Int   @unique
+  artist      Artist  @relation(fields: [artistId], references: [id], onDelete: Cascade)
+  date        DateTime
+  lieuId      Int
+  lieu        Location     @relation(fields: [lieuId], references: [id], onDelete: Cascade)
+}
+
+model Location {
+  id          Int   @id @default(autoincrement())
+  nom         String
+  type        String   // Ex: "scène", "restaurant", "toilettes"
+  description String?
+  latitude    Float
+  longitude   Float
+  meetings    Meeting[]
 }
