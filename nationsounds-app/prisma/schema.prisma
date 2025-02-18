@@ -14,8 +14,45 @@ datasource db {
 }
 
 model User {
-  id        String @id @default(uuid())
-  email     String @unique
-  name      String
-  createdAt DateTime @default(now())
+  id          Int      @id @default(autoincrement()) // Identifiant unique
+  email       String   @unique                      // Email unique
+  password    String   // Mot de passe crypté
+  firstName   String   // Prénom
+  lastName    String   // Nom
+  role        String   // Rôle (ex: 'admin', 'user')
+  createdAt   DateTime @default(now())              // Date de création
+  updatedAt   DateTime @updatedAt                   // Date de dernière mise à jour
+}
+
+model Artist {
+  id          Int      @id @default(autoincrement()) // Identifiant unique
+  name        String   // Nom de l'artiste
+  description String   // Description de l'artiste
+  tags        String[] // Genre musical de l'artiste
+  imageUrl    String?  // URL de l'image de l'artiste (facultatif)
+  scene       String   // Scène de l'artiste
+  runningOrders RunningOrder[] // Liste des performances de l'artiste
+  createdAt   DateTime @default(now())              // Date de création
+  updatedAt   DateTime @updatedAt                   // Date de dernière mise à jour
+}
+
+model RunningOrder {
+  id          Int      @id @default(autoincrement()) // Identifiant unique
+  artistId    Int      // Référence à l'artiste
+  artist      Artist   @relation(fields: [artistId], references: [id]) // Relation avec la table des artistes
+  startTime   DateTime // Heure de début de la performance
+  endTime     DateTime // Heure de fin de la performance
+  createdAt   DateTime @default(now())               // Date de création
+  updatedAt   DateTime @updatedAt                    // Date de dernière mise à jour
+}
+
+model Product {
+  id          Int      @id @default(autoincrement())
+  name        String   // Nom du produit
+  description String   // Description du produit
+  price       Float    // Prix du produit
+  quantity    Int      // Quantité disponible
+  image_url   String?  // URL de l'image du produit (facultatif)
+  createdAt   DateTime @default(now())  // Date de création
+  updatedAt   DateTime @updatedAt      // Date de mise à jour
 }
