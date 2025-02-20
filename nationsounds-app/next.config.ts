@@ -1,7 +1,12 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  scripts: {
+    lint: "next lint",
+  },
+  compilerOptions: {
+    baseUrl: "src/",
+  },
 };
 
 export default nextConfig;
