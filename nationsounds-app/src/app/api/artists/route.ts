@@ -8,7 +8,7 @@ export async function GET() {
     return NextResponse.json(artists);
   } catch {
     return NextResponse.json(
-      { error: "Erreur lors de la récupération des artistes" },
+      { error: "Error when retrieving artists" },
       { status: 500 }
     );
   }
@@ -16,13 +16,9 @@ export async function GET() {
 
 // 🔹 Ajouter un artiste (POST)
 
-export async function POST(Request: NextRequest) {
+export async function POST(req: NextRequest) {
   try {
-    const body = await Request.json();
-    console.log("✅ Données reçues :", body);
-
-    // Recherche de la scène par nom, en utilisant `findFirst`
-    // Removed unused variable 'scene'
+    const body = await req.json();
 
     const artist = await prisma.artist.create({
       data: {
@@ -32,11 +28,12 @@ export async function POST(Request: NextRequest) {
         sceneId: body.sceneId,
       },
     });
-
-    console.log("✅ Artiste créé :", artist);
     return NextResponse.json(artist, { status: 201 });
   } catch {
-    return NextResponse.json({ error: "Erreur interne" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 }
+    );
   }
 }
 // 🔹 Mettre à jour un artiste (PUT)
@@ -58,7 +55,7 @@ export async function PUT(req: NextRequest) {
     });
     return NextResponse.json(updateArtist);
   } catch (error) {
-    console.error("Error updatying artist:", error);
+    console.error("Error updating artist:", error);
     return NextResponse.json(
       { error: "Internal Server Error" },
       { status: 500 }
