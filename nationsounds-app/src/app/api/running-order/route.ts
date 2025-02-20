@@ -1,7 +1,8 @@
 import { NextResponse, NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 
-// 🔹 Récupérer tous les running (GET)
+// 🔹 Retrieve running orders (GET)
+
 export async function GET() {
   try {
     const runningOrders = await prisma.runningOrder.findMany();
@@ -11,7 +12,8 @@ export async function GET() {
   }
 }
 
-// 🔹 Ajouter un artiste (POST)
+// 🔹 Add a running orders (POST)
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
@@ -32,7 +34,7 @@ export async function POST(req: NextRequest) {
   }
 }
 
-// 🔹 Mettre à jour un artiste (PUT)
+// 🔹 Update running order (PUT)
 
 export async function PUT(req: NextRequest) {
   const { id, artistId, startTime, endTime } = await req.json();
@@ -56,7 +58,7 @@ export async function PUT(req: NextRequest) {
   }
 }
 
-// 🔹 Supprimer un artiste (DELETE)
+// 🔹 Delete running order (DELETE)
 
 export async function DELETE(req: NextRequest) {
   const { id } = await req.json();
