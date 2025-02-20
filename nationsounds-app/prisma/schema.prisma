@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -13,58 +7,89 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id          Int      @id @default(autoincrement()) // Identifiant unique
-  email       String   @unique                      // Email unique
-  password    String   // Mot de passe crypté
-  firstName   String   // Prénom
-  lastName    String   // Nom
-  role        String   // Rôle (ex: 'admin', 'user')
-  createdAt   DateTime @default(now())              // Date de création
-  updatedAt   DateTime @updatedAt                   // Date de dernière mise à jour
+enum Role {
+  ADMIN
+  USER
 }
 
+model User {
+  id        Int    @id @default(autoincrement())
+  email     String @unique
+  password  String
+  firstName String
+  lastName  String
+  role      Role   @default(USER) // Défaut : utilisateur normal
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Tag {
+  id    Int    @id @default(autoincrement())
+  name  String @unique
+  artists ArtistTag[]
+}
+
+
+
 model Artist {
-  id          Int      @id @default(autoincrement()) // Identifiant unique
-  name        String   // Nom de l'artiste
-  description String   // Description de l'artiste
-  tags        String[] // Genre musical de l'artiste
-  imageUrl    String?  // URL de l'image de l'artiste (facultatif)
-  scene       String   // Scène de l'artiste
-  runningOrders RunningOrder[] // Liste des performances de l'artiste
-  meetings     Meeting[]       // Liste des meetings de l'artiste
-  createdAt   DateTime @default(now())              // Date de création
-  updatedAt   DateTime @updatedAt                   // Date de dernière mise à jour
+  id          Int      @id @default(autoincrement())
+  name        String   
+  description String   
+  imageUrl    String?  
+  sceneId     Int? 
+  scene       Scene?  @relation(fields: [sceneId], references: [id])
+  runningOrders RunningOrder[]
+  meetings     Meeting[]
+  tags         ArtistTag[]
+  createdAt   DateTime @default(now())              
+  updatedAt   DateTime @updatedAt                   
+}
+
+model ArtistTag {
+  artistId Int
+  tagId    Int
+  artist   Artist @relation(fields: [artistId], references: [id])
+  tag      Tag    @relation(fields: [tagId], references: [id])
+  @@id([artistId, tagId])
 }
 
 model RunningOrder {
-  id          Int      @id @default(autoincrement()) // Identifiant unique
-  artistId    Int      // Référence à l'artiste
-  artist      Artist   @relation(fields: [artistId], references: [id]) // Relation avec la table des artistes
-  startTime   DateTime // Heure de début de la performance
-  endTime     DateTime // Heure de fin de la performance
-  createdAt   DateTime @default(now())               // Date de création
-  updatedAt   DateTime @updatedAt                    // Date de dernière mise à jour
+  id          Int      @id @default(autoincrement())
+  artistId    Int      
+  artist      Artist   @relation(fields: [artistId], references: [id])
+  startTime   DateTime
+  endTime     DateTime 
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt                    
+}
+
+
+model Category {
+  id   Int    @id @default(autoincrement())
+  name String @unique
+  products Product[]
 }
 
 model Product {
   id          Int      @id @default(autoincrement())
-  name        String   // Nom du produit
-  description String   // Description du produit
-  price       Float    // Prix du produit
-  quantity    Int      // Quantité disponible
-  image_url   String?  // URL de l'image du produit (facultatif)
-  createdAt   DateTime @default(now())  // Date de création
-  updatedAt   DateTime @updatedAt      // Date de mise à jour
+  name        String   
+  description String   
+  price       Float    
+  quantity    Int      
+  image_url   String?  
+  categoryId  Int
+  category    Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())  
+  updatedAt   DateTime @updatedAt      
 }
 
 model Meeting {
   id          Int   @id @default(autoincrement())
-  artistId    Int   @unique
-  artist      Artist  @relation(fields: [artistId], references: [id], onDelete: Cascade)
+  artistId    Int  
+  artist      Artist?  @relation(fields: [artistId], references: [id], onDelete: Cascade)
   date        DateTime
   lieuId      Int
-  lieu        Location     @relation(fields: [lieuId], references: [id], onDelete: Cascade)
+  lieu        Location @relation(fields: [lieuId], references: [id], onDelete: Cascade)
 }
 
 model Location {
@@ -75,4 +100,13 @@ model Location {
   latitude    Float
   longitude   Float
   meetings    Meeting[]
+}
+
+model Scene {
+  id          Int   @id @default(autoincrement())
+  name        String
+  description String?
+  latitude    Float
+  longitude   Float
+  artists     Artist[]
 }
