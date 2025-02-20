@@ -1,7 +1,8 @@
 import { NextResponse, NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 
-// 🔹 Récupérer tous les artistes (GET)
+// 🔹 Retrieve all artists (GET)
+
 export async function GET() {
   try {
     const artists = await prisma.artist.findMany();
@@ -14,7 +15,7 @@ export async function GET() {
   }
 }
 
-// 🔹 Ajouter un artiste (POST)
+// 🔹 Add an artist (POST)
 
 export async function POST(req: NextRequest) {
   try {
@@ -36,7 +37,7 @@ export async function POST(req: NextRequest) {
     );
   }
 }
-// 🔹 Mettre à jour un artiste (PUT)
+// 🔹 Update an artist (PUT)
 
 export async function PUT(req: NextRequest) {
   const { id, name, description, tags, imageUrl, scene } = await req.json();
@@ -63,7 +64,7 @@ export async function PUT(req: NextRequest) {
   }
 }
 
-// 🔹 Supprimer un artiste (DELETE)
+// 🔹 Delete an artist (DELETE)
 
 export async function DELETE(req: NextRequest) {
   const { id } = await req.json();
