@@ -89,7 +89,7 @@ model Meeting {
   artist      Artist?  @relation(fields: [artistId], references: [id], onDelete: Cascade)
   date        DateTime
   lieuId      Int
-  lieu        Location @relation(fields: [lieuId], references: [id], onDelete: Cascade)
+  lieu        Location @relation(fields: [lieuId], references: [id])
 }
 
 model Location {
