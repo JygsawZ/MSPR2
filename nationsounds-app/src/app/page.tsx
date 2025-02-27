@@ -1,7 +1,16 @@
+"use client";
+
+import Link from "next/link";
+import Accueil from "./pages/accueil/page";
+
 export default function Home() {
   return (
     <div>
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start"><h1>coucou</h1></main>
+      <main>
+        <Link href="/accuei" passHref legacyBehavior>
+          <Accueil />
+        </Link>
+      </main>
     </div>
   );
 }
