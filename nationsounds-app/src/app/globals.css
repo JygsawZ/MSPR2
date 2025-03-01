@@ -1,3 +1,34 @@
-@import "tailwindcss/base";
-@import "tailwindcss/components";
-@import "tailwindcss/utilities";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+  }
+}
+
+@layer components {
+  .btn-custom-primary {
+    @apply btn btn-primary;
+  }
+  
+  .btn-custom-secondary {
+    @apply btn btn-secondary;
+  }
+  
+  .input-custom {
+    @apply input input-bordered focus:outline-none focus:ring-2 focus:ring-primary;
+  }
+}
+
+/* Styles personnalisés */
+.loading {
+  @apply animate-spin;
+}

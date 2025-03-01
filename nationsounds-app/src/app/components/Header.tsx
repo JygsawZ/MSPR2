@@ -2,8 +2,12 @@
 
 import React from "react";
 import Link from "next/link";
+import { useSession } from "next-auth/react";
 
 const Header: React.FC = () => {
+  const { data: session } = useSession();
+  const isAdmin = session?.user?.role === "ADMIN";
+
   return (
     <React.Fragment>
       <div className="navbar bg-base-100 fixed top-0 left-0 w-full z-50 shadow-md">
@@ -72,6 +76,29 @@ const Header: React.FC = () => {
           <button className="btn btn-outline">
             <Link href="/pages/billetterie">Billetterie</Link>
           </button>
+          {isAdmin && (
+            <Link
+              href="/admin"
+              className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+            >
+              Administration
+            </Link>
+          )}
+          {session ? (
+            <Link
+              href="/dashboard"
+              className="bg-white text-black px-4 py-2 rounded hover:bg-gray-200"
+            >
+              Dashboard
+            </Link>
+          ) : (
+            <Link
+              href="/auth/login"
+              className="bg-white text-black px-4 py-2 rounded hover:bg-gray-200"
+            >
+              Connexion
+            </Link>
+          )}
         </div>
       </div>
     </React.Fragment>

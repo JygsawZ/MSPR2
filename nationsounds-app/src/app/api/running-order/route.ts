@@ -1,34 +1,140 @@
 import { NextResponse, NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { getServerSession } from "next-auth";
+import { authOptions } from "../auth/[...nextauth]/route";
 
 // 🔹 Retrieve running orders (GET)
 
 export async function GET() {
   try {
-    const runningOrders = await prisma.runningOrder.findMany();
-    return NextResponse.json(runningOrders);
-  } catch {
-    return NextResponse.json({ error: "Error when retrieving running orders" });
+    const session = await getServerSession(authOptions);
+    
+    if (!session) {
+      return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
+    }
+
+    const runningOrder = await prisma.runningOrder.findMany({
+      include: {
+        artist: {
+          select: {
+            name: true,
+          },
+        },
+        scene: {
+          select: {
+            name: true,
+          },
+        },
+      },
+      orderBy: {
+        startTime: 'asc',
+      },
+    });
+
+    return NextResponse.json(runningOrder);
+  } catch (error) {
+    console.error("Erreur lors de la récupération du running order:", error);
+    return NextResponse.json(
+      { error: "Erreur lors de la récupération du running order" },
+      { status: 500 }
+    );
   }
 }
 
 // 🔹 Add a running orders (POST)
 
-export async function POST(req: NextRequest) {
+export async function POST(request: Request) {
   try {
-    const body = await req.json();
+    const session = await getServerSession(authOptions);
+    
+    if (!session || session.user.role !== "ADMIN") {
+      return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
+    }
+
+    const data = await request.json();
+
+    // Vérifier les chevauchements de créneaux pour l'artiste
+    const artistConflict = await prisma.runningOrder.findFirst({
+      where: {
+        artistId: data.artistId,
+        OR: [
+          {
+            AND: [
+              { startTime: { lte: new Date(data.startTime) } },
+              { endTime: { gt: new Date(data.startTime) } },
+            ],
+          },
+          {
+            AND: [
+              { startTime: { lt: new Date(data.endTime) } },
+              { endTime: { gte: new Date(data.endTime) } },
+            ],
+          },
+        ],
+      },
+    });
+
+    if (artistConflict) {
+      return NextResponse.json(
+        { error: "L'artiste a déjà un créneau sur cette plage horaire" },
+        { status: 400 }
+      );
+    }
+
+    // Vérifier les chevauchements de créneaux pour la scène
+    const sceneConflict = await prisma.runningOrder.findFirst({
+      where: {
+        sceneId: data.sceneId,
+        OR: [
+          {
+            AND: [
+              { startTime: { lte: new Date(data.startTime) } },
+              { endTime: { gt: new Date(data.startTime) } },
+            ],
+          },
+          {
+            AND: [
+              { startTime: { lt: new Date(data.endTime) } },
+              { endTime: { gte: new Date(data.endTime) } },
+            ],
+          },
+        ],
+      },
+    });
+
+    if (sceneConflict) {
+      return NextResponse.json(
+        { error: "La scène est déjà occupée sur cette plage horaire" },
+        { status: 400 }
+      );
+    }
 
     const runningOrder = await prisma.runningOrder.create({
       data: {
-        artistId: body.artistId,
-        startTime: body.startTime,
-        endTime: body.endTime,
+        artistId: data.artistId,
+        sceneId: data.sceneId,
+        startTime: new Date(data.startTime),
+        endTime: new Date(data.endTime),
+      },
+      include: {
+        artist: {
+          select: {
+            name: true,
+          },
+        },
+        scene: {
+          select: {
+            name: true,
+          },
+        },
       },
     });
+
     return NextResponse.json(runningOrder, { status: 201 });
-  } catch {
+  } catch (error) {
+    console.error("Erreur lors de la création du créneau:", error);
     return NextResponse.json(
-      { error: "Internal Server Error" },
+      { error: "Erreur lors de la création du créneau" },
       { status: 500 }
     );
   }
