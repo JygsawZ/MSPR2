@@ -13,56 +13,66 @@ enum Role {
 }
 
 model User {
-  id        Int    @id @default(autoincrement())
-  email     String @unique
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
   password  String
-  firstName String
-  lastName  String
-  role      Role   @default(USER) // Défaut : utilisateur normal
+  role      String   @default("USER")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@map("users")
 }
 
 model Tag {
-  id    Int    @id @default(autoincrement())
-  name  String @unique
-  artists ArtistTag[]
+  id          Int         @id @default(autoincrement())
+  name        String      @unique
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  artists     ArtistTag[]
+
+  @@map("tags")
 }
 
-
-
 model Artist {
-  id          Int      @id @default(autoincrement())
-  name        String   
-  description String   
-  imageUrl    String?  
-  sceneId     Int? 
-  scene       Scene?  @relation(fields: [sceneId], references: [id])
-  runningOrders RunningOrder[]
-  meetings     Meeting[]
+  id           Int            @id @default(autoincrement())
+  name         String
+  description  String?
+  image        String?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
   tags         ArtistTag[]
-  createdAt   DateTime @default(now())              
-  updatedAt   DateTime @updatedAt                   
+  runningOrders RunningOrder[]
+  scene        Scene?         @relation(fields: [sceneId], references: [id])
+  sceneId      Int?
+
+  @@map("artists")
 }
 
 model ArtistTag {
-  artistId Int
-  tagId    Int
-  artist   Artist @relation(fields: [artistId], references: [id])
-  tag      Tag    @relation(fields: [tagId], references: [id])
+  artist    Artist    @relation(fields: [artistId], references: [id])
+  artistId  Int
+  tag       Tag       @relation(fields: [tagId], references: [id])
+  tagId     Int
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
   @@id([artistId, tagId])
+  @@map("artist_tags")
 }
 
 model RunningOrder {
-  id          Int      @id @default(autoincrement())
-  artistId    Int      
-  artist      Artist   @relation(fields: [artistId], references: [id])
-  startTime   DateTime
-  endTime     DateTime 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt                    
-}
+  id        Int      @id @default(autoincrement())
+  artist    Artist   @relation(fields: [artistId], references: [id])
+  artistId  Int
+  scene     Scene    @relation(fields: [sceneId], references: [id])
+  sceneId   Int
+  startTime DateTime
+  endTime   DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
+  @@map("running_orders")
+}
 
 model Category {
   id   Int    @id @default(autoincrement())
@@ -83,30 +93,28 @@ model Product {
   updatedAt   DateTime @updatedAt      
 }
 
-model Meeting {
-  id          Int   @id @default(autoincrement())
-  artistId    Int  
-  artist      Artist?  @relation(fields: [artistId], references: [id], onDelete: Cascade)
-  date        DateTime
-  lieuId      Int
-  lieu        Location @relation(fields: [lieuId], references: [id])
-}
-
 model Location {
-  id          Int   @id @default(autoincrement())
-  nom         String
-  type        String   // Ex: "scène", "restaurant", "toilettes"
-  description String?
-  latitude    Float
-  longitude   Float
-  meetings    Meeting[]
-}
-
-model Scene {
-  id          Int   @id @default(autoincrement())
+  id          Int      @id @default(autoincrement())
   name        String
   description String?
   latitude    Float
   longitude   Float
-  artists     Artist[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("locations")
+}
+
+model Scene {
+  id           Int            @id @default(autoincrement())
+  name         String
+  description  String?
+  latitude     Float
+  longitude    Float
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  artists      Artist[]
+  runningOrders RunningOrder[]
+
+  @@map("scenes")
 }

@@ -13,7 +13,7 @@ const Accueil: React.FC = () => {
   return (
     <React.Fragment>
       <div className="flex-col justify-items-center">
-        <div className="flex justify-center mt-20 pt-15 pb-5">
+        <div className="flex justify-center pt-20 pb-5">
           <Image
             src="/corefeast3.jpg"
             alt="Core Feast"

@@ -7,6 +7,14 @@ const nextConfig: NextConfig = {
   compilerOptions: {
     baseUrl: "src/",
   },
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "wsyoqfgpvjkbpuequplv.supabase.co",
+      },
+    ],
+  },
 };
 
 export default nextConfig;

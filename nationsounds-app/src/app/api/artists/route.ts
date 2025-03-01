@@ -1,15 +1,36 @@
+"client server";
+
 import { NextResponse, NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { getServerSession } from "next-auth";
+import { authOptions } from "../auth/[...nextauth]/route";
 
 // 🔹 Retrieve all artists (GET)
 
 export async function GET() {
   try {
-    const artists = await prisma.artist.findMany();
+    const session = await getServerSession(authOptions);
+    
+    if (!session) {
+      return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
+    }
+
+    const artists = await prisma.artist.findMany({
+      include: {
+        scene: true,
+        tags: {
+          include: {
+            tag: true
+          }
+        }
+      }
+    });
+
     return NextResponse.json(artists);
-  } catch {
+  } catch (error) {
+    console.error("Erreur lors de la récupération des artistes:", error);
     return NextResponse.json(
-      { error: "Error when retrieving artists" },
+      { error: "Erreur lors de la récupération des artistes" },
       { status: 500 }
     );
   }
@@ -17,26 +38,37 @@ export async function GET() {
 
 // 🔹 Add an artist (POST)
 
-export async function POST(req: NextRequest) {
+// TODO : Add image directcly to the storage supabase
+
+export async function POST(request: Request) {
   try {
-    const body = await req.json();
+    const session = await getServerSession(authOptions);
+    
+    if (!session || session.user.role !== "ADMIN") {
+      return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
+    }
+
+    const data = await request.json();
 
     const artist = await prisma.artist.create({
       data: {
-        name: body.name,
-        description: body.description,
-        imageUrl: body.imageUrl,
-        sceneId: body.sceneId,
+        name: data.name,
+        description: data.description,
+        imageUrl: data.imageUrl,
+        sceneId: data.sceneId,
       },
     });
+
     return NextResponse.json(artist, { status: 201 });
-  } catch {
+  } catch (error) {
+    console.error("Erreur lors de la création de l'artiste:", error);
     return NextResponse.json(
-      { error: "Internal Server Error" },
+      { error: "Erreur lors de la création de l'artiste" },
       { status: 500 }
     );
   }
 }
+
 // 🔹 Update an artist (PUT)
 
 export async function PUT(req: NextRequest) {
