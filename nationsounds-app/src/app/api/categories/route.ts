@@ -12,10 +12,15 @@ export async function GET() {
       return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
     }
 
-    const categories = await prisma.category.findMany();
+    const categories = await prisma.category.findMany({
+      include: {
+        products: true,
+      },
+    });
+
     return NextResponse.json(categories);
   } catch (error) {
-    console.error("Erreur lors de la récupération des catégories:", error);
+    console.error("Error fetching categories:", error);
     return NextResponse.json(
       { error: "Erreur lors de la récupération des catégories" },
       { status: 500 }
@@ -28,20 +33,21 @@ export async function POST(request: Request) {
   try {
     const session = await getServerSession(authOptions);
     
-    if (!session || session.user.role !== "ADMIN") {
+    if (!session) {
       return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
     }
 
-    const data = await request.json();
+    const json = await request.json();
+
     const category = await prisma.category.create({
       data: {
-        name: data.name,
+        name: json.name,
       },
     });
 
-    return NextResponse.json(category, { status: 201 });
+    return NextResponse.json(category);
   } catch (error) {
-    console.error("Erreur lors de la création de la catégorie:", error);
+    console.error("Error creating category:", error);
     return NextResponse.json(
       { error: "Erreur lors de la création de la catégorie" },
       { status: 500 }

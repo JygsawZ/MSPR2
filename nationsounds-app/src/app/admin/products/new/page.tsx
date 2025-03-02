@@ -69,66 +69,66 @@ export default function NewProduct() {
 
   return (
     <div className="p-6 max-w-2xl mx-auto">
-      <h1 className="text-2xl font-bold mb-6 text-black">Ajouter un produit</h1>
+      <h1 className="text-2xl font-bold mb-6 text-white">Ajouter un produit</h1>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block text-sm font-medium mb-1 text-black">Nom</label>
+          <label className="block text-sm font-medium mb-1 text-white">Nom</label>
           <input
             type="text"
             value={formData.name}
             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-            className="w-full p-2 border rounded"
+            className="w-full p-2 border rounded text-black"
             required
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1 text-black">Description</label>
+          <label className="block text-sm font-medium mb-1 text-white">Description</label>
           <textarea
             value={formData.description}
             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-            className="w-full p-2 border rounded"
+            className="w-full p-2 border rounded text-black"
             rows={4}
             required
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1 text-black">Prix</label>
+          <label className="block text-sm font-medium mb-1 text-white">Prix</label>
           <input
             type="number"
             step="0.01"
             value={formData.price}
             onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-            className="w-full p-2 border rounded"
+            className="w-full p-2 border rounded text-black"
             required
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1 text-black">Quantité</label>
+          <label className="block text-sm font-medium mb-1 text-white">Quantité</label>
           <input
             type="number"
             value={formData.quantity}
             onChange={(e) => setFormData({ ...formData, quantity: e.target.value })}
-            className="w-full p-2 border rounded"
+            className="w-full p-2 border rounded text-black"
             required
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1 text-black">URL de l'image</label>
+          <label className="block text-sm font-medium mb-1 text-white">URL de l'image</label>
           <input
             type="url"
             value={formData.image_url}
             onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
-            className="w-full p-2 border rounded"
+            className="w-full p-2 border rounded text-black"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1 text-black">Catégorie</label>
+          <label className="block text-sm font-medium mb-1 text-white">Catégorie</label>
           <select
             value={formData.categoryId}
             onChange={(e) => setFormData({ ...formData, categoryId: e.target.value })}

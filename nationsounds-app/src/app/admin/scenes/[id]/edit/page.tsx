@@ -3,8 +3,10 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Scene } from ".prisma/client";
+import { use } from "react";
 
-export default function EditScenePage({ params }: { params: { id: string } }) {
+export default function EditScenePage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params);
   const router = useRouter();
   const [scene, setScene] = useState<Scene | null>(null);
   const [loading, setLoading] = useState(true);
@@ -21,7 +23,7 @@ export default function EditScenePage({ params }: { params: { id: string } }) {
   useEffect(() => {
     const fetchScene = async () => {
       try {
-        const response = await fetch(`/api/scenes/${params.id}`);
+        const response = await fetch(`/api/scenes/${id}`);
         if (!response.ok) {
           throw new Error("Erreur lors de la récupération de la scène");
         }
@@ -41,7 +43,7 @@ export default function EditScenePage({ params }: { params: { id: string } }) {
     };
 
     fetchScene();
-  }, [params.id]);
+  }, [id]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,7 +51,7 @@ export default function EditScenePage({ params }: { params: { id: string } }) {
     setError("");
 
     try {
-      const response = await fetch(`/api/scenes/${params.id}`, {
+      const response = await fetch(`/api/scenes/${id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -109,10 +111,10 @@ export default function EditScenePage({ params }: { params: { id: string } }) {
 
   return (
     <div className="p-4">
-      <h1 className="text-2xl font-bold mb-4 text-black">Modifier la scène</h1>
+      <h1 className="text-2xl font-bold mb-4 text-white">Modifier la scène</h1>
       <form onSubmit={handleSubmit} className="space-y-4 max-w-2xl">
         <div>
-          <label htmlFor="name" className="block text-sm font-medium mb-1 text-black">
+          <label htmlFor="name" className="block text-sm font-medium mb-1 text-white">
             Nom
           </label>
           <input
@@ -127,7 +129,7 @@ export default function EditScenePage({ params }: { params: { id: string } }) {
         </div>
 
         <div>
-          <label htmlFor="description" className="block text-sm font-medium mb-1 text-black">
+          <label htmlFor="description" className="block text-sm font-medium mb-1 text-white">
             Description
           </label>
           <textarea
@@ -142,7 +144,7 @@ export default function EditScenePage({ params }: { params: { id: string } }) {
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label htmlFor="latitude" className="block text-sm font-medium mb-1 text-black">
+            <label htmlFor="latitude" className="block text-sm font-medium mb-1 text-white">
               Latitude
             </label>
             <input
@@ -158,7 +160,7 @@ export default function EditScenePage({ params }: { params: { id: string } }) {
           </div>
 
           <div>
-            <label htmlFor="longitude" className="block text-sm font-medium mb-1 text-black">
+            <label htmlFor="longitude" className="block text-sm font-medium mb-1 text-white">
               Longitude
             </label>
             <input
