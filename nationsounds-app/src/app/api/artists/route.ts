@@ -75,7 +75,19 @@ export async function POST(request: Request) {
         description: data.description,
         image: data.image,
         sceneId: data.sceneId,
+        tags: {
+          create: data.tagIds.map((tagId: number) => ({
+            tagId: tagId
+          }))
+        }
       },
+      include: {
+        tags: {
+          include: {
+            tag: true
+          }
+        }
+      }
     });
 
     return NextResponse.json(artist, { status: 201 });

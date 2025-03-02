@@ -11,18 +11,25 @@ interface Scene {
   name: string;
 }
 
+interface Tag {
+  id: number;
+  name: string;
+}
+
 interface Artist {
   id: number;
   name: string;
   description: string;
   image: string | null;
   sceneId: number | null;
+  tags: { tagId: number; tag: { id: number; name: string; } }[];
 }
 
 export default function EditArtist({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const router = useRouter();
   const [scenes, setScenes] = useState<Scene[]>([]);
+  const [tags, setTags] = useState<Tag[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -31,11 +38,12 @@ export default function EditArtist({ params }: { params: Promise<{ id: string }>
     name: "",
     description: "",
     sceneId: "",
+    tagIds: [] as number[],
   });
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [uploadProgress, setUploadProgress] = useState(0);
 
-  // Charger l'artiste et les scènes
+  // Charger l'artiste, les scènes et les tags
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -50,6 +58,7 @@ export default function EditArtist({ params }: { params: Promise<{ id: string }>
           name: artistData.name,
           description: artistData.description,
           sceneId: artistData.sceneId?.toString() || "",
+          tagIds: artistData.tags.map(t => t.tag.id),
         });
         
         if (artistData.image) {
@@ -57,13 +66,26 @@ export default function EditArtist({ params }: { params: Promise<{ id: string }>
           setImagePreview(artistData.image);
         }
 
-        // Charger les scènes
-        const scenesResponse = await fetch("/api/scenes");
+        // Charger les scènes et les tags
+        const [scenesResponse, tagsResponse] = await Promise.all([
+          fetch("/api/scenes"),
+          fetch("/api/tags")
+        ]);
+
         if (!scenesResponse.ok) {
           throw new Error("Erreur lors du chargement des scènes");
         }
-        const scenesData = await scenesResponse.json();
+        if (!tagsResponse.ok) {
+          throw new Error("Erreur lors du chargement des tags");
+        }
+
+        const [scenesData, tagsData] = await Promise.all([
+          scenesResponse.json(),
+          tagsResponse.json()
+        ]);
+
         setScenes(scenesData);
+        setTags(tagsData);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Une erreur est survenue");
       } finally {
@@ -73,6 +95,16 @@ export default function EditArtist({ params }: { params: Promise<{ id: string }>
 
     fetchData();
   }, [id]);
+
+  const handleTagChange = (tagId: number) => {
+    setFormData(prev => {
+      const currentTags = prev.tagIds;
+      const newTags = currentTags.includes(tagId)
+        ? currentTags.filter(id => id !== tagId)
+        : [...currentTags, tagId];
+      return { ...prev, tagIds: newTags };
+    });
+  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -115,7 +147,6 @@ export default function EditArtist({ params }: { params: Promise<{ id: string }>
 
       if (selectedFile) {
         try {
-          // Pass the current image URL to handle replacement
           imageUrl = await uploadImage(selectedFile, currentImage || undefined);
         } catch (uploadErr: any) {
           console.error("Upload error:", uploadErr);
@@ -254,26 +285,44 @@ export default function EditArtist({ params }: { params: Promise<{ id: string }>
           </select>
         </div>
 
+        <div>
+          <label className="block text-sm font-medium mb-1 text-white">Tags</label>
+          <div className="grid grid-cols-2 gap-2">
+            {tags.map((tag) => (
+              <label key={tag.id} className="flex items-center space-x-2 text-white">
+                <input
+                  type="checkbox"
+                  checked={formData.tagIds.includes(tag.id)}
+                  onChange={() => handleTagChange(tag.id)}
+                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                />
+                <span>{tag.name}</span>
+              </label>
+            ))}
+          </div>
+        </div>
+
         {error && (
           <div className="text-red-500 bg-red-900/20 p-3 rounded-md border border-red-500">
             {error}
           </div>
         )}
 
-        <div className="flex gap-4">
-          <button
-            type="submit"
-            disabled={loading}
-            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50"
-          >
-            {loading ? "Modification en cours..." : "Modifier"}
-          </button>
+        <div className="flex justify-end space-x-4">
           <button
             type="button"
             onClick={() => router.push("/admin/artists")}
-            className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+            className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
+            disabled={loading}
           >
             Annuler
+          </button>
+          <button
+            type="submit"
+            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+            disabled={loading}
+          >
+            {loading ? "Enregistrement..." : "Enregistrer"}
           </button>
         </div>
       </form>

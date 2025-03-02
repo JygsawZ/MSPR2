@@ -5,7 +5,7 @@ import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { type NextRequest } from 'next/server'
 
 // Configuration des routes protégées
-const protectedRoutes = ["/dashboard", "/admin"];
+const protectedRoutes = ["/admin"];
 const adminRoutes = ["/admin"];
 const authRoutes = ["/auth/login", "/auth/register"];
 
@@ -75,7 +75,7 @@ export async function middleware(request: NextRequestWithAuth) {
 
   // Si l'utilisateur est connecté et essaie d'accéder aux pages d'auth
   if (token && isAuthRoute) {
-    return NextResponse.redirect(new URL("/dashboard", request.url));
+    return NextResponse.redirect(new URL("/", request.url));
   }
 
   // Si l'utilisateur n'est pas connecté et essaie d'accéder à une route protégée
@@ -94,7 +94,7 @@ export async function middleware(request: NextRequestWithAuth) {
     adminRoutes.some((route) => request.nextUrl.pathname.startsWith(route)) &&
     token.role !== "ADMIN"
   ) {
-    return NextResponse.redirect(new URL("/dashboard", request.url));
+    return NextResponse.redirect(new URL("/", request.url));
   }
 
   return response;
@@ -103,7 +103,6 @@ export async function middleware(request: NextRequestWithAuth) {
 // Configuration des routes à matcher pour le middleware
 export const config = {
   matcher: [
-    "/dashboard/:path*",
     "/admin/:path*",
     "/auth/login",
     "/auth/register",

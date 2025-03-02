@@ -3,6 +3,9 @@ import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../auth/[...nextauth]/route";
 import { supabase } from "@/lib/supabase";
+import { Prisma, PrismaClient } from "@prisma/client";
+
+type TransactionClient = Omit<PrismaClient, '$connect' | '$disconnect' | '$on' | '$transaction' | '$use'>;
 
 // Helper function to extract filename from URL
 const getFilenameFromUrl = (url: string) => {
@@ -16,6 +19,12 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
+    const session = await getServerSession(authOptions);
+    
+    if (!session) {
+      return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
+    }
+
     const id = parseInt(params.id);
     const artist = await prisma.artist.findUnique({
       where: { id },
@@ -30,12 +39,15 @@ export async function GET(
     });
 
     if (!artist) {
-      return NextResponse.json({ error: "Artiste non trouvé" }, { status: 404 });
+      return NextResponse.json(
+        { error: "Artiste non trouvé" },
+        { status: 404 }
+      );
     }
 
     return NextResponse.json(artist);
   } catch (error) {
-    console.error("Erreur lors de la récupération de l'artiste:", error);
+    console.error("Error fetching artist:", error);
     return NextResponse.json(
       { error: "Erreur lors de la récupération de l'artiste" },
       { status: 500 }
@@ -43,7 +55,7 @@ export async function GET(
   }
 }
 
-// PUT /api/artists/[id] - Mettre à jour un artiste - Admin only
+// PUT /api/artists/[id] - Mettre à jour un artiste
 export async function PUT(
   request: Request,
   { params }: { params: { id: string } }
@@ -51,27 +63,29 @@ export async function PUT(
   try {
     const session = await getServerSession(authOptions);
     
-    if (!session || session.user.role !== "ADMIN") {
+    if (!session) {
       return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
     }
 
     const id = parseInt(params.id);
     const data = await request.json();
 
-    // Get the current artist to check if we need to delete old image
-    const currentArtist = await prisma.artist.findUnique({
+    // Vérifier si l'artiste existe
+    const existingArtist = await prisma.artist.findUnique({
       where: { id },
-      select: { image: true }
+      include: {
+        tags: true
+      }
     });
 
-    // If there's a new image and an old image exists, delete the old one
-    if (data.image && currentArtist?.image && data.image !== currentArtist.image) {
-      const oldFilename = getFilenameFromUrl(currentArtist.image);
-      await supabase.storage
-        .from('artists-images')
-        .remove([oldFilename]);
+    if (!existingArtist) {
+      return NextResponse.json(
+        { error: "Artiste non trouvé" },
+        { status: 404 }
+      );
     }
 
+    // Mise à jour de l'artiste avec les nouvelles données
     const updatedArtist = await prisma.artist.update({
       where: { id },
       data: {
@@ -79,21 +93,38 @@ export async function PUT(
         description: data.description,
         image: data.image,
         sceneId: data.sceneId,
-        updatedAt: new Date(),
+        tags: {
+          deleteMany: {}, // Supprimer toutes les relations existantes
+          create: Array.isArray(data.tagIds) ? data.tagIds.map((tagId: number) => ({
+            tagId: tagId
+          })) : []
+        }
       },
+      include: {
+        scene: true,
+        tags: {
+          include: {
+            tag: true
+          }
+        }
+      }
     });
 
     return NextResponse.json(updatedArtist);
   } catch (error) {
     console.error("Error updating artist:", error);
+    let errorMessage = "Erreur lors de la mise à jour de l'artiste";
+    if (error instanceof Error) {
+      errorMessage += `: ${error.message}`;
+    }
     return NextResponse.json(
-      { error: "Internal Server Error" },
+      { error: errorMessage },
       { status: 500 }
     );
   }
 }
 
-// DELETE /api/artists/[id] - Supprimer un artiste - Admin only
+// DELETE /api/artists/[id] - Supprimer un artiste
 export async function DELETE(
   request: Request,
   { params }: { params: { id: string } }
@@ -101,34 +132,26 @@ export async function DELETE(
   try {
     const session = await getServerSession(authOptions);
     
-    if (!session || session.user.role !== "ADMIN") {
+    if (!session) {
       return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
     }
 
     const id = parseInt(params.id);
 
-    // Get the artist to delete their image
-    const artist = await prisma.artist.findUnique({
-      where: { id },
-      select: { image: true }
+    // Supprimer l'artiste (les relations seront automatiquement supprimées grâce aux contraintes de clé étrangère)
+    await prisma.artist.delete({
+      where: { id }
     });
 
-    // If artist has an image, delete it from storage
-    if (artist?.image) {
-      const filename = getFilenameFromUrl(artist.image);
-      await supabase.storage
-        .from('artists-images')
-        .remove([filename]);
-    }
-
-    // Delete the artist from the database
-    await prisma.artist.delete({ where: { id } });
-
-    return NextResponse.json({ message: "Artist and associated image deleted successfully" });
+    return new NextResponse(null, { status: 204 });
   } catch (error) {
     console.error("Error deleting artist:", error);
+    let errorMessage = "Erreur lors de la suppression de l'artiste";
+    if (error instanceof Error) {
+      errorMessage += `: ${error.message}`;
+    }
     return NextResponse.json(
-      { error: "Internal Server Error" },
+      { error: errorMessage },
       { status: 500 }
     );
   }

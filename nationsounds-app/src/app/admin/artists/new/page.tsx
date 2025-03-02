@@ -10,9 +10,15 @@ interface Scene {
   name: string;
 }
 
+interface Tag {
+  id: number;
+  name: string;
+}
+
 export default function NewArtist() {
   const router = useRouter();
   const [scenes, setScenes] = useState<Scene[]>([]);
+  const [tags, setTags] = useState<Tag[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -20,19 +26,33 @@ export default function NewArtist() {
     name: "",
     description: "",
     sceneId: "",
+    tagIds: [] as number[],
   });
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [uploadProgress, setUploadProgress] = useState(0);
 
   useEffect(() => {
-    const fetchScenes = async () => {
+    const fetchData = async () => {
       try {
-        const response = await fetch("/api/scenes");
-        if (!response.ok) {
+        const [scenesResponse, tagsResponse] = await Promise.all([
+          fetch("/api/scenes"),
+          fetch("/api/tags")
+        ]);
+
+        if (!scenesResponse.ok) {
           throw new Error("Erreur lors du chargement des scènes");
         }
-        const data = await response.json();
-        setScenes(data);
+        if (!tagsResponse.ok) {
+          throw new Error("Erreur lors du chargement des tags");
+        }
+
+        const [scenesData, tagsData] = await Promise.all([
+          scenesResponse.json(),
+          tagsResponse.json()
+        ]);
+
+        setScenes(scenesData);
+        setTags(tagsData);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Une erreur est survenue");
       } finally {
@@ -40,8 +60,18 @@ export default function NewArtist() {
       }
     };
 
-    fetchScenes();
+    fetchData();
   }, []);
+
+  const handleTagChange = (tagId: number) => {
+    setFormData(prev => {
+      const currentTags = prev.tagIds;
+      const newTags = currentTags.includes(tagId)
+        ? currentTags.filter(id => id !== tagId)
+        : [...currentTags, tagId];
+      return { ...prev, tagIds: newTags };
+    });
+  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -189,6 +219,23 @@ export default function NewArtist() {
               </option>
             ))}
           </select>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium mb-1 text-white">Tags</label>
+          <div className="grid grid-cols-2 gap-2">
+            {tags.map((tag) => (
+              <label key={tag.id} className="flex items-center space-x-2 text-white">
+                <input
+                  type="checkbox"
+                  checked={formData.tagIds.includes(tag.id)}
+                  onChange={() => handleTagChange(tag.id)}
+                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                />
+                <span>{tag.name}</span>
+              </label>
+            ))}
+          </div>
         </div>
 
         <div className="flex justify-end space-x-4">
