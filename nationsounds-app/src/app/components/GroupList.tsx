@@ -18,7 +18,12 @@ const GroupList: React.FC = () => {
           throw new Error("Erreur lors de la récupération des artistes");
         }
         const data = await response.json();
-        setArtists(data);
+        // Filtrer les artistes qui ont une scène et un horaire
+        const filteredArtists = data.filter((artist: Artists) => 
+          artist.sceneId && // A une scène assignée
+          artist.jour && artist.heure // A un horaire assigné
+        );
+        setArtists(filteredArtists);
       } catch (err) {
         setError((err as Error).message);
       } finally {
@@ -27,8 +32,9 @@ const GroupList: React.FC = () => {
     };
     fetchArtists();
   }, []);
-  if (loading) return <p>Chargement...</p>;
-  if (error) return <p>Erreur : {error}</p>;
+
+  if (loading) return <div>Chargement...</div>;
+  if (error) return <div className="text-red-500">Erreur: {error}</div>;
 
   // const filteredArtists =
   //   selectedDay === "Tous"
@@ -48,7 +54,7 @@ const GroupList: React.FC = () => {
   return (
     <React.Fragment>
       <div className="lg:px-52">
-        <div className="flex justify-center ">
+        <div className="flex justify-center">
           <button
             title="day"
             className="btn btn mx-1 lg:btn-lg md:mx-2"
@@ -65,7 +71,7 @@ const GroupList: React.FC = () => {
                   <GroupCard key={artist.id} artist={artist} />
                 ))
               ) : (
-                <p>Aucun artiste trouvé</p>
+                <p className="text-center text-white text-lg">Aucun artiste programmé pour le moment</p>
               )}
             </div>
           </div>

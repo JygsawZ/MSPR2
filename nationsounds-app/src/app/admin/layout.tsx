@@ -12,6 +12,7 @@ import {
   FaTags,
   FaTheaterMasks,
   FaSignOutAlt,
+  FaLayerGroup,
 } from "react-icons/fa";
 import { signOut } from "next-auth/react";
 
@@ -26,15 +27,16 @@ const menuItems: MenuItem[] = [
   { name: "Gestion des artistes", href: "/admin/artists", icon: FaGuitar },
   { name: "Running Order", href: "/admin/running-order", icon: FaStopwatch },
   { name: "Gestion des produits", href: "/admin/products", icon: FaStore },
+  { name: "Gestion des catégories", href: "/admin/categories", icon: FaLayerGroup },
   { name: "Gestion des tags", href: "/admin/tags", icon: FaTags },
   { name: "Gestion des utilisateurs", href: "/admin/users", icon: FaUsers },
 ];
 
-export default function AdminLayout({
-  children,
-}: {
+interface AdminLayoutProps {
   children: React.ReactNode;
-}) {
+}
+
+export default function AdminLayout({ children }: AdminLayoutProps) {
   const pathname = usePathname();
 
   const handleLogout = () => {
@@ -45,7 +47,9 @@ export default function AdminLayout({
     <div className="min-h-screen bg-black">
       {/* Header */}
       <header className="bg-gray-900 text-white py-4 px-6 flex justify-between items-center">
-        <h1 className="text-2xl font-bold">Administration NationSounds</h1>
+        <Link href="/admin" className="text-2xl font-bold hover:text-gray-200">
+          Administration NationSounds
+        </Link>
         <button
           onClick={handleLogout}
           className="flex items-center text-gray-300 hover:text-white"

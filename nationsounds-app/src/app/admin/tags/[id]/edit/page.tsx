@@ -59,34 +59,43 @@ export default function EditTag({ params }: { params: { id: string } }) {
   if (error) return <div className="text-red-500">Erreur: {error}</div>;
 
   return (
-    <div className="p-6 max-w-2xl mx-auto">
-      <h1 className="text-2xl font-bold mb-6 text-black">Modifier le tag</h1>
-
-      <form onSubmit={handleSubmit} className="space-y-4">
+    <div className="p-4">
+      <h1 className="text-2xl font-bold mb-4 text-white">Modifier le tag</h1>
+      <form onSubmit={handleSubmit} className="space-y-4 max-w-2xl">
         <div>
-          <label className="block text-sm font-medium mb-1 text-black">Nom</label>
+          <label htmlFor="name" className="block text-sm font-medium mb-1 text-white">
+            Nom
+          </label>
           <input
             type="text"
+            id="name"
+            name="name"
             value={formData.name}
             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-            className="w-full p-2 border rounded"
             required
+            className="w-full p-2 rounded-md bg-white border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-black"
           />
         </div>
 
-        <div className="flex justify-end space-x-4">
+        {error && (
+          <div className="text-red-500 bg-red-900/20 p-3 rounded-md border border-red-500">
+            {error}
+          </div>
+        )}
+
+        <div className="flex gap-4">
+          <button
+            type="submit"
+            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+          >
+            Enregistrer
+          </button>
           <button
             type="button"
             onClick={() => router.push("/admin/tags")}
-            className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
+            className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
           >
             Annuler
-          </button>
-          <button
-            type="submit"
-            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-          >
-            Enregistrer
           </button>
         </div>
       </form>

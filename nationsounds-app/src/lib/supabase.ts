@@ -27,8 +27,49 @@ export const generateUniqueFileName = (originalName: string) => {
   return `${timestamp}-${random}.${extension}`;
 };
 
+// Helper function to extract filename from URL
+export const getFilenameFromUrl = (url: string): string | null => {
+  try {
+    const urlObj = new URL(url);
+    const pathname = urlObj.pathname;
+    const parts = pathname.split('/');
+    return parts[parts.length - 1];
+  } catch (e) {
+    console.error('Error extracting filename from URL:', e);
+    return null;
+  }
+};
+
+// Helper function to delete image
+export const deleteImage = async (imageUrl: string): Promise<void> => {
+  const filename = getFilenameFromUrl(imageUrl);
+  if (!filename) {
+    console.warn('Could not extract filename from URL:', imageUrl);
+    return;
+  }
+
+  const { error } = await supabase.storage
+    .from('artists-images')
+    .remove([filename]);
+
+  if (error) {
+    console.error('Error deleting image:', error);
+    throw error;
+  }
+};
+
 // Helper function to upload image
-export const uploadImage = async (file: File): Promise<string> => {
+export const uploadImage = async (file: File, oldImageUrl?: string): Promise<string> => {
+  // If there's an old image, delete it first
+  if (oldImageUrl) {
+    try {
+      await deleteImage(oldImageUrl);
+    } catch (error) {
+      console.warn('Failed to delete old image:', error);
+      // Continue with upload even if delete fails
+    }
+  }
+
   const fileName = generateUniqueFileName(file.name);
   
   console.log('Starting upload...', {

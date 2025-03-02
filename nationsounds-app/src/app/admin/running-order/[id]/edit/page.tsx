@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 
 interface Artist {
   id: number;
@@ -27,7 +27,9 @@ interface RunningOrderItem {
   };
 }
 
-export default function EditRunningOrderPage({ params }: { params: { id: string } }) {
+export default function EditRunningOrderPage() {
+  const params = useParams();
+  const id = params.id as string;
   const router = useRouter();
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
@@ -48,7 +50,7 @@ export default function EditRunningOrderPage({ params }: { params: { id: string 
         const [artistsResponse, scenesResponse, runningOrderResponse] = await Promise.all([
           fetch("/api/artists"),
           fetch("/api/scenes"),
-          fetch(`/api/running-order/${params.id}`),
+          fetch(`/api/running-order/${id}`),
         ]);
 
         if (!artistsResponse.ok || !scenesResponse.ok || !runningOrderResponse.ok) {
@@ -86,7 +88,7 @@ export default function EditRunningOrderPage({ params }: { params: { id: string 
     };
 
     fetchData();
-  }, [params.id]);
+  }, [id]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -94,7 +96,7 @@ export default function EditRunningOrderPage({ params }: { params: { id: string 
     setError("");
 
     try {
-      const response = await fetch(`/api/running-order/${params.id}`, {
+      const response = await fetch(`/api/running-order/${id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -148,7 +150,7 @@ export default function EditRunningOrderPage({ params }: { params: { id: string 
       <h1 className="text-2xl font-bold mb-4 text-black">Modifier le créneau</h1>
       <form onSubmit={handleSubmit} className="space-y-4 max-w-2xl">
         <div>
-          <label htmlFor="artistId" className="block text-sm font-medium mb-1 text-black">
+          <label htmlFor="artistId" className="block text-sm font-medium mb-1 text-white">
             Artiste
           </label>
           <select
@@ -169,7 +171,7 @@ export default function EditRunningOrderPage({ params }: { params: { id: string 
         </div>
 
         <div>
-          <label htmlFor="sceneId" className="block text-sm font-medium mb-1 text-black">
+          <label htmlFor="sceneId" className="block text-sm font-medium mb-1 text-white">
             Scène
           </label>
           <select
@@ -190,7 +192,7 @@ export default function EditRunningOrderPage({ params }: { params: { id: string 
         </div>
 
         <div>
-          <label htmlFor="startTime" className="block text-sm font-medium mb-1 text-black">
+          <label htmlFor="startTime" className="block text-sm font-medium mb-1 text-white">
             Date et heure de début
           </label>
           <input
@@ -205,7 +207,7 @@ export default function EditRunningOrderPage({ params }: { params: { id: string 
         </div>
 
         <div>
-          <label htmlFor="endTime" className="block text-sm font-medium mb-1 text-black">
+          <label htmlFor="endTime" className="block text-sm font-medium mb-1 text-white">
             Date et heure de fin
           </label>
           <input
