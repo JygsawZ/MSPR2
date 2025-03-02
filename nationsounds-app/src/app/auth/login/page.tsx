@@ -31,7 +31,7 @@ export default function LoginPage() {
       if (result?.error) {
         setError(result.error);
       } else {
-        router.push("/dashboard"); // Redirection vers le dashboard après connexion
+        router.push("/"); // Redirection vers la page d'accueil après connexion
         router.refresh(); // Rafraîchit la session
       }
     } catch (error) {

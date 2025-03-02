@@ -2,11 +2,21 @@
 
 import React from "react";
 import Link from "next/link";
-import { useSession } from "next-auth/react";
+import { useSession, signOut } from "next-auth/react";
+import dynamic from "next/dynamic";
 
 const Header: React.FC = () => {
   const { data: session } = useSession();
   const isAdmin = session?.user?.role === "ADMIN";
+
+  const handleAuthClick = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (session) {
+      await signOut({ redirect: true, callbackUrl: "/" });
+    } else {
+      window.location.href = "/auth/login";
+    }
+  };
 
   return (
     <React.Fragment>
@@ -50,6 +60,33 @@ const Header: React.FC = () => {
               <li>
                 <Link href="/pages/faq">FAQ</Link>
               </li>
+              {isAdmin && (
+                <li className="lg:hidden">
+                  <Link
+                    href="/admin"
+                    className="bg-black text-white hover:bg-gray-900"
+                  >
+                    Administration
+                  </Link>
+                </li>
+              )}
+              <li className="lg:hidden">
+                <button
+                  onClick={handleAuthClick}
+                  className="hover:text-gray-700 flex items-center justify-center w-full"
+                  title={session ? "Déconnexion" : "Connexion"}
+                >
+                  {session ? (
+                    <svg xmlns="http://www.w3.org/2000/svg" className="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                    </svg>
+                  ) : (
+                    <svg xmlns="http://www.w3.org/2000/svg" className="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+                    </svg>
+                  )}
+                </button>
+              </li>
             </ul>
           </div>
           <Link href="/" className="btn btn-ghost text-xl">
@@ -79,29 +116,32 @@ const Header: React.FC = () => {
           {isAdmin && (
             <Link
               href="/admin"
-              className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+              className="hidden lg:inline-block bg-black text-white px-4 py-2 rounded hover:bg-gray-900 ml-2"
             >
               Administration
             </Link>
           )}
-          {session ? (
-            <Link
-              href="/dashboard"
-              className="bg-white text-black px-4 py-2 rounded hover:bg-gray-200"
-            >
-              Dashboard
-            </Link>
-          ) : (
-            <Link
-              href="/auth/login"
-              className="bg-white text-black px-4 py-2 rounded hover:bg-gray-200"
-            >
-              Connexion
-            </Link>
-          )}
+          <button
+            onClick={handleAuthClick}
+            className="hidden lg:inline-block bg-white text-black p-2 rounded hover:bg-gray-200 ml-2"
+            title={session ? "Déconnexion" : "Connexion"}
+          >
+            {session ? (
+              <svg xmlns="http://www.w3.org/2000/svg" className="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+              </svg>
+            ) : (
+              <svg xmlns="http://www.w3.org/2000/svg" className="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+              </svg>
+            )}
+          </button>
         </div>
       </div>
     </React.Fragment>
   );
 };
-export default Header;
+
+export default dynamic(() => Promise.resolve(Header), {
+  ssr: false
+});

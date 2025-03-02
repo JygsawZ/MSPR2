@@ -1,7 +1,16 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import type { Artist } from ".prisma/client";
+
+interface Artist {
+  id: number;
+  name: string;
+  description: string;
+  image: string | null;
+  sceneId: number | null;
+  scene: { name: string } | null;
+  tags: { tag: { name: string } }[];
+}
 
 export default function ArtistsManagement() {
   const [artists, setArtists] = useState<Artist[]>([]);
@@ -70,6 +79,7 @@ export default function ArtistsManagement() {
               <th className="px-6 py-3 border-b text-left text-black">Description</th>
               <th className="px-6 py-3 border-b text-left text-black">URL de l'image</th>
               <th className="px-6 py-3 border-b text-left text-black">Scène</th>
+              <th className="px-6 py-3 border-b text-left text-black">Tags</th>
               <th className="px-6 py-3 border-b text-center text-black">Actions</th>
             </tr>
           </thead>
@@ -97,7 +107,19 @@ export default function ArtistsManagement() {
                   )}
                 </td>
                 <td className="px-6 py-4 border-b text-black">
-                  {artist.sceneId ? `Scène ${artist.sceneId}` : "Non assigné"}
+                  {artist.scene ? artist.scene.name : "Non assigné"}
+                </td>
+                <td className="px-6 py-4 border-b text-black">
+                  <div className="flex flex-wrap gap-1">
+                    {artist.tags.map(({ tag }) => (
+                      <span
+                        key={tag.name}
+                        className="inline-block px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full"
+                      >
+                        {tag.name}
+                      </span>
+                    ))}
+                  </div>
                 </td>
                 <td className="px-6 py-4 border-b text-center">
                   <button
