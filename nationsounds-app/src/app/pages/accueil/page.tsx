@@ -19,6 +19,8 @@ const Accueil: React.FC = () => {
             alt="Core Feast"
             width={500}
             height={300}
+            priority
+            className="w-auto h-auto"
           />
         </div>
         <div className="flex-col py-4 text-center text-2xl text-white md:text-4xl lg:text-6xl">
@@ -36,7 +38,7 @@ const Accueil: React.FC = () => {
           <br />
           <div>
             Rejoins-nous pour un week-end de pur plaisir, de passion, et
-            d&apos;adrénaline. Le chaos n’attend plus que toi !
+            d&apos;adrénaline. Le chaos n'attend plus que toi !
           </div>
         </div>
       </div>

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { use } from "react";
 
 interface Artist {
   id: number;
@@ -16,7 +17,8 @@ interface Scene {
   name: string;
 }
 
-export default function EditArtist({ params }: { params: { id: string } }) {
+export default function EditArtist({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params);
   const router = useRouter();
   const [artist, setArtist] = useState<Artist | null>(null);
   const [scenes, setScenes] = useState<Scene[]>([]);
@@ -27,7 +29,7 @@ export default function EditArtist({ params }: { params: { id: string } }) {
     const fetchData = async () => {
       try {
         // Charger l'artiste
-        const artistResponse = await fetch(`/api/artists/${params.id}`);
+        const artistResponse = await fetch(`/api/artists/${id}`);
         if (!artistResponse.ok) {
           throw new Error("Erreur lors du chargement de l'artiste");
         }
@@ -49,14 +51,14 @@ export default function EditArtist({ params }: { params: { id: string } }) {
     };
 
     fetchData();
-  }, [params.id]);
+  }, [id]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!artist) return;
 
     try {
-      const response = await fetch(`/api/artists/${params.id}`, {
+      const response = await fetch(`/api/artists/${id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -84,43 +86,43 @@ export default function EditArtist({ params }: { params: { id: string } }) {
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block text-sm font-medium mb-1">Nom</label>
+          <label className="block text-sm font-medium mb-1 text-white">Nom</label>
           <input
             type="text"
             value={artist.name}
             onChange={(e) => setArtist({ ...artist, name: e.target.value })}
-            className="w-full p-2 border rounded"
+            className="w-full p-2 border rounded text-black"
             required
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1">Description</label>
+          <label className="block text-sm font-medium mb-1 text-white">Description</label>
           <textarea
             value={artist.description}
             onChange={(e) => setArtist({ ...artist, description: e.target.value })}
-            className="w-full p-2 border rounded"
+            className="w-full p-2 border rounded text-black"
             rows={4}
             required
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1">URL de l'image</label>
+          <label className="block text-sm font-medium mb-1 text-white">URL de l'image</label>
           <input
             type="url"
             value={artist.imageUrl || ""}
             onChange={(e) => setArtist({ ...artist, imageUrl: e.target.value })}
-            className="w-full p-2 border rounded"
+            className="w-full p-2 border rounded text-black"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1">Scène</label>
+          <label className="block text-sm font-medium mb-1 text-white">Scène</label>
           <select
             value={artist.sceneId || ""}
             onChange={(e) => setArtist({ ...artist, sceneId: e.target.value ? parseInt(e.target.value) : null })}
-            className="w-full p-2 border rounded"
+            className="w-full p-2 border rounded text-black"
           >
             <option value="">Sélectionner une scène</option>
             {scenes.map((scene) => (

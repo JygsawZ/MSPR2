@@ -12,5 +12,5 @@ export type Artists = {
   scene?: Scene;
   description: string;
   sceneId: number;
-  imageUrl: string;
+  image: string;
 };
