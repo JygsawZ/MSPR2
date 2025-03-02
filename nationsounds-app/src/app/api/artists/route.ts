@@ -5,16 +5,20 @@ import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../auth/[...nextauth]/route";
 
-// 🔹 Retrieve all artists (GET)
+interface Artist {
+  id: number;
+  name: string;
+  description?: string | null;
+  image?: string | null;
+  sceneId?: number | null;
+  scene?: { name: string } | null;
+  tags: { tag: { name: string } }[];
+  runningOrders: { startTime: Date; endTime: Date }[];
+}
 
+// 🔹 Retrieve all artists (GET) - Public access
 export async function GET() {
   try {
-    const session = await getServerSession(authOptions);
-    
-    if (!session) {
-      return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
-    }
-
     const artists = await prisma.artist.findMany({
       include: {
         scene: true,
@@ -22,11 +26,29 @@ export async function GET() {
           include: {
             tag: true
           }
+        },
+        runningOrders: {
+          select: {
+            startTime: true,
+            endTime: true
+          }
         }
       }
     });
 
-    return NextResponse.json(artists);
+    // Format the response to include jour and heure
+    const formattedArtists = artists.map((artist: Artist) => {
+      const runningOrder = artist.runningOrders[0]; // Get the first running order
+      const startTime = runningOrder ? new Date(runningOrder.startTime) : null;
+
+      return {
+        ...artist,
+        jour: startTime ? startTime.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' }) : undefined,
+        heure: startTime ? startTime.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) : undefined,
+      };
+    });
+
+    return NextResponse.json(formattedArtists);
   } catch (error) {
     console.error("Erreur lors de la récupération des artistes:", error);
     return NextResponse.json(
@@ -36,10 +58,7 @@ export async function GET() {
   }
 }
 
-// 🔹 Add an artist (POST)
-
-// TODO : Add image directcly to the storage supabase
-
+// 🔹 Add an artist (POST) - Admin only
 export async function POST(request: Request) {
   try {
     const session = await getServerSession(authOptions);
@@ -54,7 +73,7 @@ export async function POST(request: Request) {
       data: {
         name: data.name,
         description: data.description,
-        imageUrl: data.imageUrl,
+        image: data.image,
         sceneId: data.sceneId,
       },
     });
@@ -69,20 +88,24 @@ export async function POST(request: Request) {
   }
 }
 
-// 🔹 Update an artist (PUT)
-
+// 🔹 Update an artist (PUT) - Admin only
 export async function PUT(req: NextRequest) {
-  const { id, name, description, tags, imageUrl, scene } = await req.json();
-
   try {
+    const session = await getServerSession(authOptions);
+    
+    if (!session || session.user.role !== "ADMIN") {
+      return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
+    }
+
+    const { id, name, description, tags, imageUrl, scene } = await req.json();
+
     const updateArtist = await prisma.artist.update({
       where: { id },
       data: {
         name,
         description,
-        tags,
-        imageUrl,
-        scene,
+        image: imageUrl,
+        sceneId: scene?.id,
         updatedAt: new Date(),
       },
     });
@@ -96,11 +119,16 @@ export async function PUT(req: NextRequest) {
   }
 }
 
-// 🔹 Delete an artist (DELETE)
-
+// 🔹 Delete an artist (DELETE) - Admin only
 export async function DELETE(req: NextRequest) {
-  const { id } = await req.json();
   try {
+    const session = await getServerSession(authOptions);
+    
+    if (!session || session.user.role !== "ADMIN") {
+      return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
+    }
+
+    const { id } = await req.json();
     await prisma.artist.delete({ where: { id } });
     return NextResponse.json({ message: "Artist deleted successfully" });
   } catch (error) {

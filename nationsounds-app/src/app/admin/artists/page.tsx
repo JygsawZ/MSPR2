@@ -53,7 +53,7 @@ export default function ArtistsManagement() {
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Gestion des Artistes</h1>
+        <h1 className="text-2xl font-bold text-white">Gestion des Artistes</h1>
         <button
           onClick={() => window.location.href = "/admin/artists/new"}
           className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
@@ -68,6 +68,7 @@ export default function ArtistsManagement() {
             <tr className="bg-gray-100">
               <th className="px-6 py-3 border-b text-left text-black">Nom</th>
               <th className="px-6 py-3 border-b text-left text-black">Description</th>
+              <th className="px-6 py-3 border-b text-left text-black">URL de l'image</th>
               <th className="px-6 py-3 border-b text-left text-black">Scène</th>
               <th className="px-6 py-3 border-b text-center text-black">Actions</th>
             </tr>
@@ -80,6 +81,20 @@ export default function ArtistsManagement() {
                   {(artist.description && artist.description.length > 100)
                     ? `${artist.description.substring(0, 100)}...`
                     : artist.description || ""}
+                </td>
+                <td className="px-6 py-4 border-b text-black">
+                  {artist.image ? (
+                    <a 
+                      href={artist.image} 
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      className="text-blue-600 hover:text-blue-800 underline"
+                    >
+                      Voir l'image
+                    </a>
+                  ) : (
+                    "Aucune image"
+                  )}
                 </td>
                 <td className="px-6 py-4 border-b text-black">
                   {artist.sceneId ? `Scène ${artist.sceneId}` : "Non assigné"}

@@ -1,20 +1,23 @@
-import React from "react";
+import React, { useState } from "react";
 import { Artists } from "../../../typescript/artists";
 import Image from "next/image.js";
 import { Button } from "@/components/ui/Button/Button";
 
 const GroupCard = ({ artist }: { artist: Artists }) => {
+  const [isOpen, setIsOpen] = useState(false);
+
   return (
     <React.Fragment>
       <div className="p-4">
-        <div className="card bg-base-100 shadow-xl lg:card-normal flex flex-col ">
-          <figure className="relative w-full" style={{ height: "50vh" }}>
+        <div className="card bg-base-100 shadow-xl lg:card-normal flex flex-col">
+          <figure className="relative w-full aspect-video">
             <Image
-              src={artist.imageUrl}
-              layout="fill"
-              objectFit="contain"
-              objectPosition="top"
+              src={artist.image || "/default-artist.jpg"}
+              fill
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              style={{ objectFit: "cover", objectPosition: "center" }}
               alt={artist.name}
+              className="rounded-t-xl"
             />
           </figure>
           <div className="card-body flex flex-col flex-grow-0">
@@ -33,13 +36,29 @@ const GroupCard = ({ artist }: { artist: Artists }) => {
               Scène: {artist.scene?.name || "Inconnue"}
             </div>
             <div className="card-actions justify-end mt-auto">
-              <div className="collapse bg-black">
-                <input title="checkbox" type="checkbox" className="peer" />
-                <div className="collapse-title bg-black text-white peer-checked:bg-black peer-checked:text-white md:text-xl lg:text-2xl">
+              <button 
+                onClick={() => setIsOpen(!isOpen)}
+                className="w-full bg-gray-800 rounded-lg hover:bg-gray-700 transition-colors p-4"
+              >
+                <div className="flex items-center justify-between text-white md:text-xl lg:text-2xl">
                   Description
+                  <svg 
+                    className={`w-6 h-6 transform transition-transform ${isOpen ? 'rotate-180' : ''}`}
+                    fill="none" 
+                    stroke="currentColor" 
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
                 </div>
-                <div className="collapse-content bg-black text-white peer-checked:bg-black peer-checked:text-white md:text-xl lg:text-2xl">
-                  <p id="description">{artist.description}</p>
+              </button>
+              <div 
+                className={`w-full overflow-hidden transition-all duration-200 ease-in-out ${
+                  isOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+                }`}
+              >
+                <div className="bg-gray-900 text-white rounded-b-lg md:text-lg p-4">
+                  <p className="whitespace-pre-wrap">{artist.description || "Aucune description disponible"}</p>
                 </div>
               </div>
             </div>
