@@ -83,8 +83,8 @@ const GroupList: React.FC = () => {
     fetchData();
   }, []);
 
-  // Filtrer les artistes en fonction des critères
-  const filteredArtists = useMemo(() => {
+  // Filtrer et regrouper les artistes par jour
+  const groupedArtists = useMemo(() => {
     // D'abord, filtrer les artistes
     const filtered = artists.filter((artist) => {
       // Trouver le running order correspondant à l'artiste
@@ -117,22 +117,35 @@ const GroupList: React.FC = () => {
         matchesTags = filters.selectedTags.every((tag) => artistTags.includes(tag));
       }
 
-      // Retourner true seulement si TOUS les critères sont satisfaits
       return matchesSearch && matchesDay && matchesTimeRange && matchesTags;
     });
 
-    // Ensuite, trier les artistes filtrés par horaire de passage
-    return filtered.sort((a, b) => {
+    // Trier les artistes par horaire
+    const sorted = filtered.sort((a, b) => {
       const runningOrderA = runningOrders.find(order => order.artistId === a.id);
       const runningOrderB = runningOrders.find(order => order.artistId === b.id);
 
-      // Si un artiste n'a pas de running order, le mettre à la fin
       if (!runningOrderA) return 1;
       if (!runningOrderB) return -1;
 
-      // Comparer les dates de passage
       return new Date(runningOrderA.startTime).getTime() - new Date(runningOrderB.startTime).getTime();
     });
+
+    // Grouper par jour
+    const groups = sorted.reduce((acc, artist) => {
+      const runningOrder = runningOrders.find(order => order.artistId === artist.id);
+      if (runningOrder) {
+        const date = new Date(runningOrder.startTime);
+        const day = date.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
+        if (!acc[day]) {
+          acc[day] = [];
+        }
+        acc[day].push(artist);
+      }
+      return acc;
+    }, {} as Record<string, Artists[]>);
+
+    return groups;
   }, [artists, runningOrders, filters]);
 
   if (loading) return <div>Chargement...</div>;
@@ -146,21 +159,32 @@ const GroupList: React.FC = () => {
         availableDays={availableDays}
       />
       
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {filteredArtists.length > 0 ? (
-          filteredArtists.map((artist) => (
-            <div key={artist.id} className="w-full">
-              <GroupCard artist={artist} />
+      {Object.entries(groupedArtists).length > 0 ? (
+        Object.entries(groupedArtists).map(([day, dayArtists]) => (
+          <div key={day} className="mb-12">
+            {/* Séparateur de jour */}
+            <div className="relative flex justify-center my-8">
+              <div className="absolute inset-x-0 top-1/2 h-px -translate-y-1/2 bg-transparent bg-gradient-to-r from-transparent via-gray-300 to-transparent opacity-75"></div>
+              <span className="relative z-10 bg-black px-6 text-white md:text-2xl lg:text-4xl">
+                {day}
+              </span>
             </div>
-          ))
-        ) : (
-          <div className="col-span-full">
-            <p className="text-center text-white text-lg">
-              Aucun artiste ne correspond aux critères de recherche
-            </p>
+
+            {/* Grille d'artistes pour ce jour */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {dayArtists.map((artist) => (
+                <div key={artist.id} className="w-full">
+                  <GroupCard artist={artist} />
+                </div>
+              ))}
+            </div>
           </div>
-        )}
-      </div>
+        ))
+      ) : (
+        <div className="text-center text-white text-lg">
+          Aucun artiste ne correspond aux critères de recherche
+        </div>
+      )}
     </div>
   );
 };

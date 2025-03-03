@@ -24,7 +24,7 @@ export default async function RootLayout({
       <body className="bg-black">
         <Providers session={session}>
           <Header />
-          <main>{children}</main>
+          <main className="pt-16">{children}</main>
           <CookieConsent />
           <Footer />
         </Providers>
