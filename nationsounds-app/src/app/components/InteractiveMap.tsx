@@ -10,6 +10,18 @@ import toilettesIconData from "../../../public/assets/icons/toilettes.png";
 import restaurantIconData from "../../../public/assets/icons/restaurant.png";
 import campingIconData from "../../../public/assets/icons/camping.png";
 
+// Correction des icônes Leaflet par défaut
+const defaultIcon = new L.Icon({
+  iconUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png",
+  shadowUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png",
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41]
+});
+
+L.Marker.prototype.options.icon = defaultIcon;
+
 const sceneIconUrl = sceneIconData.src;
 const toilettesIconUrl = toilettesIconData.src;
 const restaurantIconUrl = restaurantIconData.src;
@@ -19,7 +31,7 @@ const campingIconUrl = campingIconData.src;
 interface PointOfInterest {
   id: number;
   name: string;
-  position: LatLngExpression; // Type natif de Leaflet pour les coordonnées
+  position: LatLngExpression;
   icon: Icon;
 }
 
@@ -32,9 +44,9 @@ const createIcon = (iconUrl: string): Icon =>
   });
 
 const sceneIcon = createIcon(sceneIconUrl);
-const toilettesIcon = createIcon(toilettesIconUrl);
-const restaurantIcon = createIcon(restaurantIconUrl);
-const campingIcon = createIcon(campingIconUrl);
+const toilettesIcon = createIcon(toilettesIconData.src);
+const restaurantIcon = createIcon(restaurantIconData.src);
+const campingIcon = createIcon(campingIconData.src);
 
 // Liste des points d'intérêt
 const pointsOfInterest: PointOfInterest[] = [
@@ -61,9 +73,7 @@ const pointsOfInterest: PointOfInterest[] = [
 ];
 
 const InteractiveMap: React.FC = () => {
-  const [userLocation, setUserLocation] = useState<LatLngExpression | null>(
-    null
-  );
+  const [userLocation, setUserLocation] = useState<LatLngExpression | null>(null);
   const mapRef = useRef<L.Map | null>(null);
 
   const handleSetMap = (newMap: LeafletMap) => {
@@ -80,7 +90,7 @@ const InteractiveMap: React.FC = () => {
 
       if (!mapRef.current.hasEventListeners("locationfound")) {
         mapRef.current.on("locationfound", (e: L.LocationEvent) => {
-          L.marker(e.latlng)
+          const userMarker = L.marker(e.latlng, { icon: defaultIcon })
             .addTo(mapRef.current as LeafletMap)
             .bindPopup("Vous êtes ici")
             .openPopup();
@@ -103,6 +113,7 @@ const InteractiveMap: React.FC = () => {
         },
         (error: GeolocationPositionError) => {
           console.error(error);
+          alert("Impossible d'accéder à votre position. Veuillez vérifier vos paramètres de géolocalisation.");
         }
       );
     } else {
@@ -126,7 +137,7 @@ const InteractiveMap: React.FC = () => {
           center={[48.859607002831574, 2.3845481224854352]}
           zoom={17}
           style={{ height: "100%", width: "100%", borderRadius: "10px" }}
-          whenReady={() => handleSetMap(mapRef.current as LeafletMap)} // Typage explicite pour map
+          whenReady={() => handleSetMap(mapRef.current as LeafletMap)}
         >
           <TileLayer
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -141,18 +152,19 @@ const InteractiveMap: React.FC = () => {
           ))}
 
           {userLocation && (
-            <Marker position={userLocation}>
+            <Marker position={userLocation} icon={defaultIcon}>
               <Popup>Vous êtes ici</Popup>
             </Marker>
           )}
         </MapContainer>
 
-        {/* Bouton Localiser */}
+        {/* Bouton Localiser - Temporairement masqué
         <div className="flex justify-center p-4">
           <button className="btn" onClick={handleGeolocation}>
             Me Localiser
           </button>
         </div>
+        */}
       </div>
     </React.Fragment>
   );

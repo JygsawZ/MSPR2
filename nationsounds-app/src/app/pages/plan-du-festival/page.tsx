@@ -9,11 +9,14 @@ const DynamicMap = dynamic(() => import("../../components/InteractiveMap"), {
 
 const Map: React.FC = () => {
   return (
-    <React.Fragment>
-      <div className="flex justify-center bg-black">
-        <DynamicMap />
+    <div className="min-h-screen bg-black">
+      <div className="container mx-auto px-4 py-8">
+        <div className="rounded-lg overflow-hidden shadow-2xl">
+          <DynamicMap />
+        </div>
       </div>
-    </React.Fragment>
+    </div>
   );
 };
+
 export default Map;
