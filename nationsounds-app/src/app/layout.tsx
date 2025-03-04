@@ -6,6 +6,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "./api/auth/[...nextauth]/route";
 import Providers from "./components/Providers";
 import CookieConsent from "./components/CookieConsent";
+import ScrollToTop from "./components/ScrollToTop";
 
 export const metadata: Metadata = {
   title: "NationSounds Festival",
@@ -25,6 +26,7 @@ export default async function RootLayout({
         <Providers session={session}>
           <Header />
           <main className="pt-16">{children}</main>
+          <ScrollToTop />
           <CookieConsent />
           <Footer />
         </Providers>

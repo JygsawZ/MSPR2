@@ -60,6 +60,9 @@ const Header: React.FC = () => {
               <li>
                 <Link href="/pages/faq">FAQ</Link>
               </li>
+              <li>
+                <Link href="/partenaires">Partenaires</Link>
+              </li>
               {isAdmin && (
                 <li className="lg:hidden">
                   <Link
@@ -106,6 +109,9 @@ const Header: React.FC = () => {
             </li>
             <li>
               <Link href="/pages/faq">FAQ</Link>
+            </li>
+            <li>
+              <Link href="/partenaires">Partenaires</Link>
             </li>
           </ul>
         </div>
