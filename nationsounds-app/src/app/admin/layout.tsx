@@ -45,20 +45,6 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 
   return (
     <div className="min-h-screen bg-black">
-      {/* Header */}
-      <header className="bg-gray-900 text-white py-4 px-6 flex justify-between items-center">
-        <Link href="/admin" className="text-2xl font-bold hover:text-gray-200">
-          Administration NationSounds
-        </Link>
-        <button
-          onClick={handleLogout}
-          className="flex items-center text-gray-300 hover:text-white"
-        >
-          <FaSignOutAlt className="mr-2" />
-          Déconnexion
-        </button>
-      </header>
-
       <div className="flex">
         {/* Sidebar */}
         <aside className="w-64 bg-gray-900 min-h-[calc(100vh-4rem)]">
