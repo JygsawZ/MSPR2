@@ -91,110 +91,121 @@ const Filter: React.FC<FilterProps> = ({ onFilterChange, availableTags, availabl
   };
 
   return (
-    <div className="bg-black border border-white p-4 rounded-lg shadow-lg mb-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Recherche par nom */}
-        <div className="form-control">
-          <label className="label">
-            <span className="label-text text-gray-300">Rechercher un artiste</span>
-          </label>
-          <input
-            type="text"
-            placeholder="Nom de l'artiste..."
-            className="input input-bordered bg-gray-900 text-white border-gray-700 w-full placeholder-gray-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-            value={searchQuery}
-            onChange={handleSearchChange}
-          />
-        </div>
+    <>
+      {/* Titre Programmation */}
+      <div className="relative flex justify-center my-8">
+        <div className="absolute inset-x-0 top-1/2 h-px -translate-y-1/2 bg-transparent bg-gradient-to-r from-transparent via-gray-300 to-transparent opacity-75"></div>
+        <span className="relative z-10 bg-black px-6 text-white md:text-2xl lg:text-4xl">
+          Programmation
+        </span>
+      </div>
 
-        {/* Filtre par jour */}
-        <div className="form-control">
-          <label className="label">
-            <span className="label-text text-gray-300">Jour</span>
-          </label>
-          <select
-            className="select select-bordered bg-gray-900 text-white border-gray-700 w-full focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-            value={selectedDay}
-            onChange={handleDayChange}
-          >
-            <option value="" className="bg-gray-900">Tous les jours</option>
-            {availableDays.map((day) => (
-              <option key={day} value={day} className="bg-gray-900">
-                {day}
-              </option>
-            ))}
-          </select>
-        </div>
+      {/* Filtres */}
+      <div className="bg-black border border-white p-4 rounded-lg shadow-lg mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* Recherche par nom */}
+          <div className="form-control">
+            <label className="label">
+              <span className="label-text text-gray-300">Rechercher un artiste</span>
+            </label>
+            <input
+              type="text"
+              placeholder="Nom de l'artiste..."
+              className="input input-bordered bg-gray-900 text-white border-gray-700 w-full placeholder-gray-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+              value={searchQuery}
+              onChange={handleSearchChange}
+            />
+          </div>
 
-        {/* Filtre par plage horaire */}
-        <div className="form-control">
-          <label className="label">
-            <span className="label-text text-gray-300">Plage horaire</span>
-          </label>
-          <div className="flex gap-2">
+          {/* Filtre par jour */}
+          <div className="form-control">
+            <label className="label">
+              <span className="label-text text-gray-300">Jour</span>
+            </label>
             <select
               className="select select-bordered bg-gray-900 text-white border-gray-700 w-full focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-              value={startTime}
-              onChange={handleStartTimeChange}
+              value={selectedDay}
+              onChange={handleDayChange}
             >
-              <option value="" className="bg-gray-900">Début</option>
-              {timeSlots.map((time) => (
-                <option key={time} value={time} className="bg-gray-900">
-                  {time}
-                </option>
-              ))}
-            </select>
-            <select
-              className="select select-bordered bg-gray-900 text-white border-gray-700 w-full focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-              value={endTime}
-              onChange={handleEndTimeChange}
-            >
-              <option value="" className="bg-gray-900">Fin</option>
-              {timeSlots.map((time) => (
-                <option key={time} value={time} className="bg-gray-900">
-                  {time}
+              <option value="" className="bg-gray-900">Tous les jours</option>
+              {availableDays.map((day) => (
+                <option key={day} value={day} className="bg-gray-900">
+                  {day}
                 </option>
               ))}
             </select>
           </div>
-        </div>
 
-        {/* Bouton de réinitialisation */}
-        <div className="form-control">
-          <label className="label">
-            <span className="label-text text-gray-300">Réinitialiser</span>
-          </label>
-          <button
-            onClick={clearFilters}
-            className="btn bg-gray-800 text-white hover:bg-gray-700 border-gray-700 w-full"
-          >
-            Réinitialiser les filtres
-          </button>
-        </div>
-      </div>
+          {/* Filtre par plage horaire */}
+          <div className="form-control">
+            <label className="label">
+              <span className="label-text text-gray-300">Plage horaire</span>
+            </label>
+            <div className="flex gap-2">
+              <select
+                className="select select-bordered bg-gray-900 text-white border-gray-700 w-full focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                value={startTime}
+                onChange={handleStartTimeChange}
+              >
+                <option value="" className="bg-gray-900">Début</option>
+                {timeSlots.map((time) => (
+                  <option key={time} value={time} className="bg-gray-900">
+                    {time}
+                  </option>
+                ))}
+              </select>
+              <select
+                className="select select-bordered bg-gray-900 text-white border-gray-700 w-full focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                value={endTime}
+                onChange={handleEndTimeChange}
+              >
+                <option value="" className="bg-gray-900">Fin</option>
+                {timeSlots.map((time) => (
+                  <option key={time} value={time} className="bg-gray-900">
+                    {time}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
 
-      {/* Tags */}
-      <div className="mt-4">
-        <label className="label">
-          <span className="label-text text-gray-300">Tags</span>
-        </label>
-        <div className="flex flex-wrap gap-2">
-          {availableTags.map((tag) => (
+          {/* Bouton de réinitialisation */}
+          <div className="form-control">
+            <label className="label">
+              <span className="label-text text-gray-300">Réinitialiser</span>
+            </label>
             <button
-              key={tag.id}
-              onClick={() => handleTagToggle(tag.name)}
-              className={`btn btn-sm ${
-                selectedTags.includes(tag.name)
-                  ? "bg-blue-600 text-white hover:bg-blue-700 border-blue-600"
-                  : "bg-gray-800 text-gray-300 hover:bg-gray-700 border-gray-700"
-              }`}
+              onClick={clearFilters}
+              className="btn bg-gray-800 text-white hover:bg-gray-700 border-gray-700 w-full"
             >
-              {tag.name}
+              Réinitialiser les filtres
             </button>
-          ))}
+          </div>
+        </div>
+
+        {/* Tags */}
+        <div className="mt-4">
+          <label className="label">
+            <span className="label-text text-gray-300">Tags</span>
+          </label>
+          <div className="flex flex-wrap gap-2">
+            {availableTags.map((tag) => (
+              <button
+                key={tag.id}
+                onClick={() => handleTagToggle(tag.name)}
+                className={`btn btn-sm ${
+                  selectedTags.includes(tag.name)
+                    ? "bg-blue-600 text-white hover:bg-blue-700 border-blue-600"
+                    : "bg-gray-800 text-gray-300 hover:bg-gray-700 border-gray-700"
+                }`}
+              >
+                {tag.name}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 
