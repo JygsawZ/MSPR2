@@ -1,21 +1,22 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
-import { authOptions } from "../auth/[...nextauth]/route";
+import { authOptions } from "../../auth/[...nextauth]/route";
 
-// GET /api/tags - Liste publique des tags
+// GET /api/tags/admin - Liste admin des tags
 export async function GET() {
   try {
+    const session = await getServerSession(authOptions);
+    
+    if (!session || session.user.role !== "ADMIN") {
+      return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
+    }
+
     const tags = await prisma.tag.findMany({
       include: {
         artists: {
-          select: {
-            artist: {
-              select: {
-                id: true,
-                name: true,
-              },
-            },
+          include: {
+            artist: true,
           },
         },
       },
@@ -34,7 +35,7 @@ export async function GET() {
   }
 }
 
-// POST /api/tags - Créer un nouveau tag
+// POST /api/tags/admin - Créer un nouveau tag
 export async function POST(request: Request) {
   try {
     const session = await getServerSession(authOptions);
@@ -45,27 +46,10 @@ export async function POST(request: Request) {
 
     const data = await request.json();
 
-    // Vérifier si le tag existe déjà
-    const existingTag = await prisma.tag.findUnique({
-      where: {
-        name: data.name,
-      },
-    });
-
-    if (existingTag) {
-      return NextResponse.json(
-        { error: "Un tag avec ce nom existe déjà" },
-        { status: 400 }
-      );
-    }
-
     const tag = await prisma.tag.create({
       data: {
         name: data.name,
       },
-      include: {
-        artists: true,
-      }
     });
 
     return NextResponse.json(tag, { status: 201 });

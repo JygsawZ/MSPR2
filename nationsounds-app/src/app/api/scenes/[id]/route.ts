@@ -9,22 +9,19 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const session = await getServerSession(authOptions);
-    
-    if (!session) {
-      return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
-    }
-
     const id = parseInt(params.id);
     const scene = await prisma.scene.findUnique({
       where: { id },
       include: {
         artists: true,
-      }
+      },
     });
 
     if (!scene) {
-      return NextResponse.json({ error: "Scène non trouvée" }, { status: 404 });
+      return NextResponse.json(
+        { error: "Scène non trouvée" },
+        { status: 404 }
+      );
     }
 
     return NextResponse.json(scene);
@@ -85,11 +82,12 @@ export async function DELETE(
     }
 
     const id = parseInt(params.id);
+
     await prisma.scene.delete({
       where: { id },
     });
 
-    return NextResponse.json({ message: "Scène supprimée avec succès" });
+    return new NextResponse(null, { status: 204 });
   } catch (error) {
     console.error("Erreur lors de la suppression de la scène:", error);
     return NextResponse.json(

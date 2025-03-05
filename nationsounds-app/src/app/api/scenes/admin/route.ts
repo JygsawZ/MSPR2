@@ -1,19 +1,20 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
-import { authOptions } from "../auth/[...nextauth]/route";
+import { authOptions } from "../../auth/[...nextauth]/route";
 
-// GET /api/scenes - Liste publique des scènes
+// GET /api/scenes/admin - Liste admin des scènes
 export async function GET() {
   try {
+    const session = await getServerSession(authOptions);
+    
+    if (!session || session.user.role !== "ADMIN") {
+      return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
+    }
+
     const scenes = await prisma.scene.findMany({
       include: {
-        artists: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
+        artists: true,
       },
       orderBy: {
         name: 'asc',
@@ -30,7 +31,7 @@ export async function GET() {
   }
 }
 
-// POST /api/scenes - Créer une nouvelle scène
+// POST /api/scenes/admin - Créer une nouvelle scène
 export async function POST(request: Request) {
   try {
     const session = await getServerSession(authOptions);

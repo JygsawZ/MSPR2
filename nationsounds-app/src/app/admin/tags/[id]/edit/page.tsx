@@ -1,12 +1,18 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import type { Tag } from ".prisma/client";
+import { use } from "react";
 
-export default function EditTag({ params }: { params: { id: string } }) {
+export default function EditTag({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params);
   const router = useRouter();
+  const [tag, setTag] = useState<Tag | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [saving, setSaving] = useState(false);
+
   const [formData, setFormData] = useState({
     name: "",
   });
@@ -14,29 +20,32 @@ export default function EditTag({ params }: { params: { id: string } }) {
   useEffect(() => {
     const fetchTag = async () => {
       try {
-        const response = await fetch(`/api/tags/${params.id}`);
+        const response = await fetch(`/api/tags/${id}`);
         if (!response.ok) {
-          throw new Error("Erreur lors du chargement du tag");
+          throw new Error("Erreur lors de la récupération du tag");
         }
         const data = await response.json();
+        setTag(data);
         setFormData({
           name: data.name,
         });
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Une erreur est survenue");
+      } catch (error) {
+        setError("Erreur lors de la récupération du tag");
       } finally {
         setLoading(false);
       }
     };
 
     fetchTag();
-  }, [params.id]);
+  }, [id]);
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSaving(true);
+    setError("");
 
     try {
-      const response = await fetch(`/api/tags/${params.id}`, {
+      const response = await fetch(`/api/tags/${id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -45,35 +54,55 @@ export default function EditTag({ params }: { params: { id: string } }) {
       });
 
       if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || "Erreur lors de la mise à jour");
+        throw new Error("Erreur lors de la mise à jour du tag");
       }
 
       router.push("/admin/tags");
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Erreur de mise à jour");
+    } catch (error) {
+      setError("Erreur lors de la mise à jour du tag");
+    } finally {
+      setSaving(false);
     }
   };
 
-  if (loading) return <div>Chargement...</div>;
-  if (error) return <div className="text-red-500">Erreur: {error}</div>;
+  if (loading) {
+    return (
+      <div className="p-4">
+        <div className="animate-pulse">
+          <div className="h-8 bg-gray-700 rounded w-1/4 mb-4"></div>
+          <div className="space-y-3">
+            <div className="h-4 bg-gray-700 rounded w-3/4"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-4">
+        <div className="text-red-500 bg-red-900/20 p-3 rounded-md border border-red-500">
+          {error}
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="p-4">
-      <h1 className="text-2xl font-bold mb-4 text-white">Modifier le tag</h1>
-      <form onSubmit={handleSubmit} className="space-y-4 max-w-2xl">
+    <div className="p-6 max-w-2xl mx-auto">
+      <h1 className="text-2xl font-bold mb-6 text-white">Modifier le tag</h1>
+
+      <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label htmlFor="name" className="block text-sm font-medium mb-1 text-white">
+          <label className="block text-sm font-medium mb-1 text-white">
             Nom
           </label>
           <input
             type="text"
-            id="name"
-            name="name"
             value={formData.name}
             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+            className="w-full text-black p-2 border rounded"
             required
-            className="w-full p-2 rounded-md bg-white border border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-black"
           />
         </div>
 
@@ -83,19 +112,20 @@ export default function EditTag({ params }: { params: { id: string } }) {
           </div>
         )}
 
-        <div className="flex gap-4">
-          <button
-            type="submit"
-            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-          >
-            Enregistrer
-          </button>
+        <div className="flex justify-end space-x-4">
           <button
             type="button"
             onClick={() => router.push("/admin/tags")}
-            className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+            className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
           >
             Annuler
+          </button>
+          <button
+            type="submit"
+            disabled={saving}
+            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 disabled:opacity-50"
+          >
+            {saving ? "Enregistrement..." : "Enregistrer"}
           </button>
         </div>
       </form>

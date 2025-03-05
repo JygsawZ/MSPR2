@@ -1,7 +1,14 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import type { Tag } from ".prisma/client";
+
+interface Tag {
+  id: number;
+  name: string;
+  _count?: {
+    artists: number;
+  };
+}
 
 export default function TagsManagement() {
   const [tags, setTags] = useState<Tag[]>([]);
@@ -12,7 +19,7 @@ export default function TagsManagement() {
   useEffect(() => {
     const fetchTags = async () => {
       try {
-        const response = await fetch("/api/tags");
+        const response = await fetch("/api/tags/admin");
         if (!response.ok) {
           throw new Error("Erreur lors du chargement des tags");
         }

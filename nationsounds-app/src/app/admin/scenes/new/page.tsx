@@ -21,7 +21,7 @@ export default function NewScenePage() {
     setError("");
 
     try {
-      const response = await fetch("/api/scenes", {
+      const response = await fetch("/api/scenes/admin", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

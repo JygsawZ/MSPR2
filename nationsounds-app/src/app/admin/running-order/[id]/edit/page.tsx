@@ -50,7 +50,7 @@ export default function EditRunningOrderPage() {
         const [artistsResponse, scenesResponse, runningOrderResponse] = await Promise.all([
           fetch("/api/artists"),
           fetch("/api/scenes"),
-          fetch(`/api/running-order/${id}`),
+          fetch(`/api/running-orders/${id}`),
         ]);
 
         if (!artistsResponse.ok || !scenesResponse.ok || !runningOrderResponse.ok) {
@@ -96,7 +96,7 @@ export default function EditRunningOrderPage() {
     setError("");
 
     try {
-      const response = await fetch(`/api/running-order/${id}`, {
+      const response = await fetch(`/api/running-orders/${id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
