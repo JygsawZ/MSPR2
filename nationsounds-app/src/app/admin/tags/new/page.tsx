@@ -14,7 +14,7 @@ export default function NewTag() {
     e.preventDefault();
 
     try {
-      const response = await fetch("/api/tags", {
+      const response = await fetch("/api/tags/admin", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -2,8 +2,15 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import type { Scene } from ".prisma/client";
 import { use } from "react";
+
+interface Scene {
+  id: number;
+  name: string;
+  description?: string;
+  latitude: number;
+  longitude: number;
+}
 
 export default function EditScenePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);

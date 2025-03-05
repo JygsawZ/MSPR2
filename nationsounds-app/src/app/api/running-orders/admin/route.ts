@@ -1,48 +1,38 @@
-import { NextResponse, NextRequest } from "next/server";
+import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
-import { authOptions } from "../auth/[...nextauth]/route";
+import { authOptions } from "../../auth/[...nextauth]/route";
 
-// 🔹 Retrieve running orders (GET)
-
+// GET /api/running-orders/admin - Liste admin des running orders
 export async function GET() {
   try {
     const session = await getServerSession(authOptions);
     
-    if (!session) {
+    if (!session || session.user.role !== "ADMIN") {
       return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
     }
 
-    const runningOrder = await prisma.runningOrder.findMany({
+    const runningOrders = await prisma.runningOrder.findMany({
       include: {
-        artist: {
-          select: {
-            name: true,
-          },
-        },
-        scene: {
-          select: {
-            name: true,
-          },
-        },
+        artist: true,
+        scene: true,
       },
       orderBy: {
         startTime: 'asc',
       },
     });
 
-    return NextResponse.json(runningOrder);
+    return NextResponse.json(runningOrders);
   } catch (error) {
-    console.error("Erreur lors de la récupération du running order:", error);
+    console.error("Erreur lors de la récupération des running orders:", error);
     return NextResponse.json(
-      { error: "Erreur lors de la récupération du running order" },
+      { error: "Erreur lors de la récupération des running orders" },
       { status: 500 }
     );
   }
 }
 
-// 🔹 Add a running orders (POST)
-
+// POST /api/running-orders/admin - Créer un nouveau running order
 export async function POST(request: Request) {
   try {
     const session = await getServerSession(authOptions);
@@ -117,65 +107,17 @@ export async function POST(request: Request) {
         endTime: new Date(data.endTime),
       },
       include: {
-        artist: {
-          select: {
-            name: true,
-          },
-        },
-        scene: {
-          select: {
-            name: true,
-          },
-        },
+        artist: true,
+        scene: true,
       },
     });
 
     return NextResponse.json(runningOrder, { status: 201 });
   } catch (error) {
-    console.error("Erreur lors de la création du créneau:", error);
+    console.error("Erreur lors de la création du running order:", error);
     return NextResponse.json(
-      { error: "Erreur lors de la création du créneau" },
+      { error: "Erreur lors de la création du running order" },
       { status: 500 }
     );
   }
-}
-
-// 🔹 Update running order (PUT)
-
-export async function PUT(req: NextRequest) {
-  const { id, artistId, startTime, endTime } = await req.json();
-
-  try {
-    const updateRunningOrder = await prisma.runningOrder.update({
-      where: { id },
-      data: {
-        artistId,
-        startTime,
-        endTime,
-        updatedAt: new Date(),
-      },
-    });
-    return NextResponse.json(updateRunningOrder);
-  } catch {
-    return NextResponse.json(
-      { error: "Internal Server Error" },
-      { status: 500 }
-    );
-  }
-}
-
-// 🔹 Delete running order (DELETE)
-
-export async function DELETE(req: NextRequest) {
-  const { id } = await req.json();
-
-  try {
-    await prisma.runningOrder.delete({ where: { id } });
-    return NextResponse.json({ message: "Running order deleted successfully" });
-  } catch {
-    return NextResponse.json(
-      { error: "Internal Server Error" },
-      { status: 500 }
-    );
-  }
-}
+} 

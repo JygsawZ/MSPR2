@@ -93,7 +93,7 @@ const Header: React.FC = () => {
             </ul>
           </div>
           <Link href="/" className="btn btn-ghost text-xl">
-            Nation Sound
+            Nation Sounds
           </Link>
         </div>
         <div className="navbar-center hidden lg:flex">

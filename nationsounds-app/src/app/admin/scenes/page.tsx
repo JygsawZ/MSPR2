@@ -12,7 +12,7 @@ export default function ScenesManagement() {
   useEffect(() => {
     const fetchScenes = async () => {
       try {
-        const response = await fetch("/api/scenes");
+        const response = await fetch("/api/scenes/admin");
         if (!response.ok) {
           throw new Error("Erreur lors du chargement des scènes");
         }

@@ -63,7 +63,7 @@ export default function NewRunningOrderPage() {
     setError("");
 
     try {
-      const response = await fetch("/api/running-order", {
+      const response = await fetch("/api/running-orders/admin", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

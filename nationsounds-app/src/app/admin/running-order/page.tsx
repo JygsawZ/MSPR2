@@ -26,7 +26,7 @@ export default function RunningOrderManagement() {
   useEffect(() => {
     const fetchRunningOrder = async () => {
       try {
-        const response = await fetch("/api/running-order");
+        const response = await fetch("/api/running-orders/admin");
         if (!response.ok) {
           throw new Error("Erreur lors du chargement du running order");
         }
@@ -46,7 +46,7 @@ export default function RunningOrderManagement() {
     if (!confirm("Êtes-vous sûr de vouloir supprimer ce créneau ?")) return;
 
     try {
-      const response = await fetch(`/api/running-order/${id}`, {
+      const response = await fetch(`/api/running-orders/${id}`, {
         method: "DELETE",
       });
 
